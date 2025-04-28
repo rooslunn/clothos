@@ -11,19 +11,13 @@ import (
 
 const (
 	WitnessesCount = 23
-	DateFormat = "2006-01-02 15:04:05"
+	DateFormat     = "2006-01-02 15:04:05"
 )
 
 func main() {
 
 	log := setupLogger()
 
-	// now := time.Now()
-	// year, month, day := now.Date()
-	// startOfDayLocal := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
-	// currentTime := startOfDayLocal
-
-	log.Info("Game started")
 
 	var now time.Time
 	var unixTimestamp int64
@@ -31,23 +25,30 @@ func main() {
 	var isPrime bool
 	var sleepSeconds int
 
+	now = time.Now()
+	year, month, day := now.Date()
+	startDate := time.Date(year, month, day, 0, 0, 0, 0, time.Local).Add(24 * time.Hour)
+
+	log.Info("Game started", "startDate", startDate.String())
+
 	for {
 
-		now = time.Now()
-		unixTimestamp = now.Unix()
+		unixTimestamp = startDate.Unix()
 		numberToCheck = big.NewInt(unixTimestamp)
 
 		isPrime = MillerRabin(numberToCheck, WitnessesCount)
 
 		if isPrime {
-			msg := fmt.Sprintf("%s is likely the PRIME (%s)", now.String(), numberToCheck.String())
+			msg := fmt.Sprintf("%s is likely the PRIME (%s)", startDate.Format(DateFormat), numberToCheck.String())
 			log.Info(msg)
 		}
 
-		sleepSeconds = randInt(3, 60)
-		log.Info(fmt.Sprintf("sleeping for %d secs...", sleepSeconds))
+		sleepSeconds = randInt(4, 240)
+		// log.Info(fmt.Sprintf("sleeping for %d secs...", sleepSeconds))
 
+		startDate = startDate.Add(time.Duration(sleepSeconds) * time.Second)
 		time.Sleep(time.Duration(sleepSeconds) * time.Second)
+
 	}
 }
 
